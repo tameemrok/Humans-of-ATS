@@ -19,6 +19,7 @@ def whatsapp():
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
+        print(f"📷 Media URL received: {media_url}")
 
         for era in eras:
             url = transform_image(media_url, era)
