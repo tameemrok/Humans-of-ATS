@@ -1,25 +1,42 @@
 import replicate
 import os
 
-# This function takes an image URL and an era prompt (like "1920s") and returns a generated image URL
+# Load API token from environment variable
+REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
+
+# Check if token is present
+if not REPLICATE_API_TOKEN:
+    raise ValueError("REPLICATE_API_TOKEN is not set in environment variables.")
+
+# Initialize client (Replicate will auto-use token from env)
+replicate.Client(api_token=REPLICATE_API_TOKEN)
+
 def transform_image(image_url: str, era_prompt: str):
-    replicate_api_token = os.environ.get("REPLICATE_API_TOKEN")
-    if not replicate_api_token:
-        raise Exception("Replicate API token not found")
+    """
+    Transforms the input image with a prompt based on era
+    :param image_url: URL of the selfie/photo sent via WhatsApp
+    :param era_prompt: e.g., "1920s", "2050s", etc.
+    :return: URL of the generated AI image
+    """
 
-    replicate.Client(api_token=replicate_api_token)
+    # You can customize this prompt to be more detailed per era
+    full_prompt = f"A {era_prompt} portrait photo of a person, cinematic lighting, highly detailed, 4K, trending on artstation"
 
-    full_prompt = f"A {era_prompt} photo of a person, cinematic lighting, high detail portrait"
+    # SDXL full model reference with version ID
+    model_ref = "stability-ai/sdxl:fc1ed08c89364a4a88e26c0b6e64798c37cfa4ce73d9e2df8169c920c936f47c"
 
-    output = replicate.run(
-        "stability-ai/sdxl",
-        input={
-            "prompt": full_prompt,
-            "image": image_url,
-            "width": 512,
-            "height": 512,
-            "num_outputs": 1
-        }
-    )
-
-    return output[0]
+    try:
+        output = replicate.run(
+            model_ref,
+            input={
+                "prompt": full_prompt,
+                "image": image_url,
+                "width": 512,
+                "height": 512,
+                "num_outputs": 1
+            }
+        )
+        return output[0]  # URL of generated image
+    except Exception as e:
+        print(f"Error in Replicate generation: {e}")
+        return None
