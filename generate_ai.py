@@ -1,42 +1,42 @@
 import replicate
 import os
 
-# Load API token from environment variable
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 
-# Check if token is present
 if not REPLICATE_API_TOKEN:
     raise ValueError("REPLICATE_API_TOKEN is not set in environment variables.")
 
-# Initialize client (Replicate will auto-use token from env)
+# Replicate client will auto-pick from env
 replicate.Client(api_token=REPLICATE_API_TOKEN)
 
-def transform_image(image_url: str, era_prompt: str):
-    """
-    Transforms the input image with a prompt based on era
-    :param image_url: URL of the selfie/photo sent via WhatsApp
-    :param era_prompt: e.g., "1920s", "2050s", etc.
-    :return: URL of the generated AI image
-    """
+# Mapping eras to visual styles
+ERA_STYLES = {
+    "1920s": "vintage",
+    "1980s": "cubism",
+    "2020s": "pop-art",
+    "2050": "cyberpunk"
+}
 
-    # You can customize this prompt to be more detailed per era
-    full_prompt = f"A {era_prompt} portrait photo of a person, cinematic lighting, highly detailed, 4K, trending on artstation"
+def transform_image(image_url: str, era: str):
+    style = ERA_STYLES.get(era, "vintage")
 
-    # SDXL full model reference with version ID
-    model_ref = "stability-ai/sdxl:fc1ed08c89364a4a88e26c0b6e64798c37cfa4ce73d9e2df8169c920c936f47c"
+    model_ref = "cjwbw/style-transfer:7ce1044b8fa726adb5fd23cb47a9a421664eb05c23f2e1f64b82d47a52c74a30"
 
     try:
         output = replicate.run(
             model_ref,
             input={
-                "prompt": full_prompt,
                 "image": image_url,
-                "width": 512,
-                "height": 512,
-                "num_outputs": 1
+                "style": style
             }
         )
+
+        if not output or not output[0]:
+            print(f"❌ No output from Replicate for era: {era}")
+            return None
+
         return output[0]  # URL of generated image
+
     except Exception as e:
-        print(f"Error in Replicate generation: {e}")
+        print(f"❌ Error in transform_image(): {e}")
         return None
