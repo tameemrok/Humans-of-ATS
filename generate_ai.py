@@ -1,44 +1,51 @@
 import replicate
 import os
 
+# Validate token
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 if not REPLICATE_API_TOKEN:
     raise ValueError("❌ REPLICATE_API_TOKEN is not set.")
 
 replicate.Client(api_token=REPLICATE_API_TOKEN)
 
-ERA_STYLES = {
-    "1920s": "vintage",
-    "1980s": "pop-art",
-    "2020s": "cyberpunk",
-    "2050": "fantasy"
+# Define prompts per era
+ERA_PROMPTS = {
+    "1920s": "black and white vintage 1920s portrait, studio lighting",
+    "1980s": "retro 1980s pop art style selfie, vibrant colors",
+    "2020s": "modern high-resolution Instagram-style selfie, realistic",
+    "2050": "futuristic sci-fi cyberpunk portrait with glowing lights"
 }
 
-DEFAULT_STYLE = "vintage"
+# Model reference (img2img)
+MODEL_REF = "stability-ai/stable-diffusion-img2img:15a3689ee13b0d2616e98820eca31d4c3abcd36672df6afce5cb6feb1d66087d"
 
+# Core transformation function
 def transform_image(image_url: str, era: str):
-    style = ERA_STYLES.get(era, DEFAULT_STYLE)
-
-    # 🚨 Force known-good image for now
-    image_url = "https://replicate.delivery/pbxt/XhzKvzzsNcUxb0BQn1kOzJ1aD5EoU2Thg1cqSWYc0V1KLODZ/output.png"
-
-    model_ref = "cjwbw/style-transfer:7ce1044b8fa726adb5fd23cb47a9a421664eb05c23f2e1f64b82d47a52c74a30"
-
+    prompt = ERA_PROMPTS.get(era, "vintage portrait")
+    
     try:
-        print(f"🧠 Generating '{style}' style for era '{era}'...")
+        print(f"🧠 Era: {era} | Prompt: {prompt} | Image: {image_url}")
 
         output = replicate.run(
-            model_ref,
-            input={"image": image_url, "style": style}
+            MODEL_REF,
+            input={
+                "image": image_url,
+                "prompt": prompt,
+                "scheduler": "DPMSolverMultistep",
+                "num_outputs": 1,
+                "guidance_scale": 7.5,
+                "prompt_strength": 0.8,
+                "num_inference_steps": 25
+            }
         )
 
         if not output or not output[0]:
-            print("❌ Replicate returned no image.")
+            print(f"❌ No output for {era}")
             return None
 
-        print("✅ Replicate image URL:", output[0])
+        print(f"✅ Output for {era}: {output[0]}")
         return output[0]
 
     except Exception as e:
-        print(f"❌ Error in transform_image(): {e}")
+        print(f"❌ Replicate failed for {era} → {e}")
         return None
