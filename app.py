@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from generate_ai import transform_image
 from merge_collage import create_collage
@@ -13,22 +13,25 @@ def whatsapp():
     from_number = request.values.get('From', '')
 
     resp = MessagingResponse()
-    
+
     if media_url:
         resp.message("⏳ Generating your Time Travel Face collage... Please wait!")
 
-        # Generate images for each era
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
+
         for era in eras:
-            img = transform_image(media_url, era)
-            image_urls.append(img)
+            url = transform_image(media_url, era)
+            if not url:
+                resp.message(f"❌ Failed to generate for {era}. Try again later.")
+                return str(resp)
+            image_urls.append(url)
 
-        # Create collage
+        # Save collage
         collage_path = "static/collage.jpg"
-        create_collage(image_urls, eras, output_path=collage_path)
+        create_collage(image_urls, eras, collage_path)
 
-        # Send final image
+        # Send collage
         msg = resp.message("🕰️ Here's your Time Travel Face!")
         msg.media(request.url_root + "static/collage.jpg")
     else:
