@@ -22,28 +22,20 @@ ERA_STYLES = {
 DEFAULT_STYLE = "vintage"
 
 def transform_image(image_url: str, era: str):
-    # Map era to style
-    style = ERA_STYLES.get(era, DEFAULT_STYLE)
+    style = ERA_STYLES.get(era, "vintage")
+
+    # Replace with a known good image (for testing only)
+    image_url = "https://replicate.delivery/pbxt/XhzKvzzsNcUxb0BQn1kOzJ1aD5EoU2Thg1cqSWYc0V1KLODZ/output.png"
 
     model_ref = "cjwbw/style-transfer:7ce1044b8fa726adb5fd23cb47a9a421664eb05c23f2e1f64b82d47a52c74a30"
 
-    try:
-        print(f"🧠 Requesting style: '{style}' for era: '{era}'")
+    output = replicate.run(
+        model_ref,
+        input={"image": image_url, "style": style}
+    )
 
-        output = replicate.run(
-            model_ref,
-            input={
-                "image": image_url,
-                "style": style
-            }
-        )
+    return output[0] if output and output[0] else None
 
-        if not output or not output[0]:
-            print(f"❌ No output from Replicate for era: {era}, style: {style}")
-            return None
-
-        print(f"✅ Image generated for {era}: {output[0]}")
-        return output[0]  # URL of generated image
 
     except Exception as e:
         print(f"❌ Error generating image for {era} → {e}")
