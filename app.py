@@ -15,11 +15,11 @@ def whatsapp():
     resp = MessagingResponse()
 
     if media_url:
+        print(f"📷 Media URL received: {media_url}")
         resp.message("⏳ Generating your Time Travel Face collage... Please wait!")
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
-        print(f"📷 Media URL received: {media_url}")
 
         for era in eras:
             url = transform_image(media_url, era)
@@ -28,13 +28,12 @@ def whatsapp():
                 return str(resp)
             image_urls.append(url)
 
-        # Save collage
         collage_path = "static/collage.jpg"
         create_collage(image_urls, eras, collage_path)
 
-        # Send collage
         msg = resp.message("🕰️ Here's your Time Travel Face!")
         msg.media(request.url_root + "static/collage.jpg")
+
     else:
         resp.message("👋 Send me a selfie and I’ll create your Time Travel collage!")
 
