@@ -1,28 +1,33 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from generate_ai import transform_image
+from imgbb_upload import upload_to_imgbb
 from merge_collage import create_collage
 import os
 
 app = Flask(__name__)
 
-@app.route('/whatsapp', methods=['POST'])
+@app.route("/whatsapp", methods=["POST"])
 def whatsapp():
-    incoming_msg = request.values.get('Body', '').lower()
-    media_url = request.values.get('MediaUrl0', '')
-    from_number = request.values.get('From', '')
+    incoming_msg = request.values.get("Body", "").lower()
+    media_url = request.values.get("MediaUrl0", "")
+    from_number = request.values.get("From", "")
 
     resp = MessagingResponse()
 
     if media_url:
-        print(f"📷 Media URL received: {media_url}")
         resp.message("⏳ Generating your Time Travel Face collage... Please wait!")
+
+        selfie_url = upload_to_imgbb(media_url)
+        if not selfie_url:
+            resp.message("❌ Failed to process image. Try again.")
+            return str(resp)
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
 
         for era in eras:
-            url = transform_image(media_url, era)
+            url = transform_image(selfie_url, era)
             if not url:
                 resp.message(f"❌ Failed to generate for {era}. Try again later.")
                 return str(resp)
@@ -33,7 +38,6 @@ def whatsapp():
 
         msg = resp.message("🕰️ Here's your Time Travel Face!")
         msg.media(request.url_root + "static/collage.jpg")
-
     else:
         resp.message("👋 Send me a selfie and I’ll create your Time Travel collage!")
 
