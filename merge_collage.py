@@ -2,15 +2,14 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO
 
-def create_collage(image_urls, labels, output_path="collage.jpg"):
+def create_collage(image_urls, labels, output_path="static/collage.jpg"):
     assert len(image_urls) == 4 and len(labels) == 4
 
     images = [Image.open(BytesIO(requests.get(url).content)).resize((512, 512)) for url in image_urls]
     collage = Image.new("RGB", (1024, 1024))
 
-    # Load default font
     try:
-        font = ImageFont.truetype("arial.ttf", 32)
+        font = ImageFont.truetype("arial.ttf", 28)
     except:
         font = ImageFont.load_default()
 
