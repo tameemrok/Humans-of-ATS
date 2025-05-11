@@ -1,5 +1,6 @@
 import replicate
 import os
+import requests
 
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 if not REPLICATE_API_TOKEN:
