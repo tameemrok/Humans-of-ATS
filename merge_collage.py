@@ -2,11 +2,14 @@ from PIL import Image
 from io import BytesIO
 import requests
 
-def create_collage(image_urls, eras, output_path="static/collage.jpg"):
-    images = [Image.open(BytesIO(requests.get(url).content)).resize((512, 512)) for url in image_urls]
+def create_collage(image_urls, labels, output_path="static/collage.jpg"):
+    print(f"🧩 Merging {len(image_urls)} images into collage...")
 
+    images = [Image.open(BytesIO(requests.get(url).content)).resize((512, 512)) for url in image_urls]
     collage = Image.new("RGB", (len(images) * 512, 512))
+
     for i, img in enumerate(images):
         collage.paste(img, (i * 512, 0))
 
     collage.save(output_path)
+    print(f"✅ Collage saved to {output_path}")
