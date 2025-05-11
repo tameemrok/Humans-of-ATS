@@ -44,4 +44,3 @@ def transform_image(image_url: str, era: str):
     except Exception as e:
         print(f"❌ Error from Replicate for {era}: {e}", flush=True)
         return None
-
