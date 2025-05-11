@@ -1,7 +1,6 @@
 import replicate
 import os
 
-# API key check
 REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
 if not REPLICATE_API_TOKEN:
     raise ValueError("❌ REPLICATE_API_TOKEN is not set.")
@@ -19,9 +18,9 @@ MODEL_REF = "stability-ai/stable-diffusion-img2img:15a3689ee13b0d2616e98820eca31
 
 def transform_image(image_url: str, era: str):
     prompt = ERA_PROMPTS.get(era, "vintage portrait")
-    try:
-        print(f"🧠 Era: {era} | Prompt: {prompt} | Image: {image_url}")
+    print(f"🧠 Sending to Replicate → Prompt: '{prompt}', Image URL: {image_url}")
 
+    try:
         output = replicate.run(
             MODEL_REF,
             input={
@@ -36,12 +35,12 @@ def transform_image(image_url: str, era: str):
         )
 
         if not output or not output[0]:
-            print(f"❌ No output for {era}")
+            print("❌ Replicate returned no image")
             return None
 
-        print(f"✅ Output for {era}: {output[0]}")
+        print(f"✅ Replicate image URL: {output[0]}")
         return output[0]
 
     except Exception as e:
-        print(f"❌ Replicate failed for {era} → {e}")
+        print(f"❌ Error from Replicate: {e}")
         return None
