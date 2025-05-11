@@ -13,15 +13,20 @@ def whatsapp():
     media_url = request.values.get("MediaUrl0", "")
     from_number = request.values.get("From", "")
 
+    print(f"📷 Incoming WhatsApp Media URL: {media_url}")
+
     resp = MessagingResponse()
 
     if media_url:
-        resp.message("⏳ Generating your Time Travel Face collage... Please wait!")
+        resp.message("⏳ Processing your image... Please wait...")
 
         selfie_url = upload_to_imgbb(media_url)
         if not selfie_url:
+            print("❌ Upload to ImgBB failed")
             resp.message("❌ Failed to process image. Try again.")
             return str(resp)
+
+        print(f"✅ ImgBB returned selfie URL: {selfie_url}")
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
@@ -39,10 +44,10 @@ def whatsapp():
         msg = resp.message("🕰️ Here's your Time Travel Face!")
         msg.media(request.url_root + "static/collage.jpg")
     else:
-        resp.message("👋 Send me a selfie and I’ll create your Time Travel collage!")
+        resp.message("👋 Please send a selfie to get started!")
 
     return str(resp)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
