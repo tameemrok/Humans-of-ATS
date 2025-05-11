@@ -50,7 +50,7 @@ def whatsapp():
         print("❌ No image received in WhatsApp message", flush=True)
         resp.message("👋 Please send a selfie to get started!")
 
-    print("✅ WhatsApp request completed", flush=True)
+    print("✅ WhatsApp request completed" flush=True)
     return str(resp)
 
 if __name__ == "__main__":
