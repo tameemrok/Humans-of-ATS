@@ -33,9 +33,10 @@ def upload_to_imgbb(image_url: str) -> str:
             }
         )
         res.raise_for_status()
-        url = res.json()["data"]["url"]
-        print(f"✅ ImgBB upload success: {url}", flush=True)
+        url = res.json()["data"]["display_url"]
+        print(f"✅ ImgBB returned direct image URL: {url}", flush=True)
         return url
+
 
     except Exception as e:
         print(f"❌ ImgBB Exception: {e}", flush=True)
