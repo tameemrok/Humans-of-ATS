@@ -1,7 +1,7 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from generate_ai import transform_image
-from imgbb_upload import upload_to_replicate_delivery as upload_selfie
+from cloudinary_upload import upload_to_cloudinary
 from merge_collage import create_collage
 import os
 
@@ -20,7 +20,7 @@ def whatsapp():
     if media_url:
         resp.message("⏳ Processing your image... Please wait...")
 
-        selfie_url = upload_selfie(media_url)
+        selfie_url = upload_to_cloudinary(media_url)
         if not selfie_url:
             resp.message("❌ Failed to process image. Try again.")
             return str(resp)
