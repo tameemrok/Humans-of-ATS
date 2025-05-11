@@ -2,44 +2,34 @@ import requests
 import os
 from base64 import b64encode
 
-IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 
-if not IMGBB_API_KEY:
-    raise ValueError("❌ IMGBB_API_KEY is not set.", flush=True)
-
-def upload_to_imgbb(image_url: str) -> str:
-    print(f"📤 Downloading image from Twilio: {image_url}", flush=True)
+def upload_to_replicate_delivery(image_url: str) -> str:
+    print(f"📥 Downloading image from Twilio: {image_url}", flush=True)
 
     try:
-        # Download image from Twilio
         response = requests.get(image_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN))
         response.raise_for_status()
         image_binary = response.content
-        image_base64 = b64encode(image_binary).decode("utf-8")
     except Exception as e:
         print(f"❌ Failed to download image from Twilio → {e}", flush=True)
         return None
 
-    print("📤 Uploading to ImgBB...", flush=True)
+    print("🚀 Uploading to Replicate delivery host...", flush=True)
 
     try:
-        res = requests.post(
-            "https://api.imgbb.com/1/upload",
-            data={
-                "key": IMGBB_API_KEY,
-                "image": image_base64
-            }
+        upload_response = requests.post(
+            "https://dreambooth-api-experimental.replicate.delivery/upload",
+            files={"file": ("input.jpg", image_binary, "image/jpeg")}
         )
-        res.raise_for_status()
-        url = res.json()["data"]["display_url"]
-        print(f"✅ ImgBB returned direct image URL: {url}", flush=True)
-        return url
-
+        upload_response.raise_for_status()
+        uploaded_url = upload_response.json()["url"]
+        print(f"✅ Replicate-hosted image URL: {uploaded_url}", flush=True)
+        return uploaded_url
 
     except Exception as e:
-        print(f"❌ ImgBB Exception: {e}", flush=True)
+        print(f"❌ Upload to Replicate delivery failed → {e}", flush=True)
         if hasattr(e, "response"):
-            print(f"📄 ImgBB Error response: {e.response.text}", flush=True)
+            print(f"📄 Error body: {e.response.text}", flush=True)
         return None
