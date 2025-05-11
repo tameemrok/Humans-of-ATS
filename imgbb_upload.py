@@ -1,5 +1,6 @@
 import requests
 import os
+import os
 
 IMGBB_API_KEY = os.environ.get("IMGBB_API_KEY")
 if not IMGBB_API_KEY:
