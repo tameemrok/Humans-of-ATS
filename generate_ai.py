@@ -34,8 +34,8 @@ def transform_image(image_url: str, era: str):
             }
         )
 
-        if not output or not output[0]:
-            print(f"❌ No output from Replicate for era {era}. Raw output: {output}", flush=True)
+        if not isinstance(output, list) or not output or not output[0]:
+            print(f"❌ Invalid output from Replicate. Output: {output}", flush=True)
             return None
 
         print(f"✅ Replicate image for {era}: {output[0]}", flush=True)
