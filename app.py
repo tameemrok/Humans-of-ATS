@@ -1,8 +1,7 @@
-import os
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from generate_ai import transform_image
-from imgbb_upload import upload_to_imgbb
+from imgbb_upload import upload_to_replicate_delivery as upload_selfie
 from merge_collage import create_collage
 import os
 
@@ -14,20 +13,17 @@ def whatsapp():
     media_url = request.values.get("MediaUrl0", "")
     from_number = request.values.get("From", "")
 
-    print(f"📷 Incoming WhatsApp Media URL: {media_url}")
+    print(f"📸 Incoming WhatsApp Media URL: {media_url}", flush=True)
 
     resp = MessagingResponse()
 
     if media_url:
         resp.message("⏳ Processing your image... Please wait...")
 
-        selfie_url = upload_to_imgbb(media_url)
+        selfie_url = upload_selfie(media_url)
         if not selfie_url:
-            print("❌ Upload to ImgBB failed")
             resp.message("❌ Failed to process image. Try again.")
             return str(resp)
-
-        print(f"✅ ImgBB returned selfie URL: {selfie_url}")
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
