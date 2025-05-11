@@ -3,3 +3,4 @@ twilio==8.9.0
 Pillow==10.2.0
 requests==2.31.0
 replicate==0.21.0
+cloudinary
