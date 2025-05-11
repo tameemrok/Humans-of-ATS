@@ -1,6 +1,5 @@
 import requests
 import os
-import os
 
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
@@ -20,8 +19,8 @@ def upload_to_replicate_delivery(image_url: str) -> str:
 
     try:
         upload_response = requests.post(
-            "https://dreambooth-api-experimental.replicate.delivery/upload",
-            files={"file": ("input.jpg", image_binary, "image/jpeg")}
+            "https://replicate.delivery/upload",   # ✅ NEW URL
+            files={"file": ("selfie.jpg", image_binary, "image/jpeg")}
         )
         upload_response.raise_for_status()
         uploaded_url = upload_response.json()["url"]
@@ -30,6 +29,9 @@ def upload_to_replicate_delivery(image_url: str) -> str:
 
     except Exception as e:
         print(f"❌ Upload to Replicate delivery failed → {e}", flush=True)
-        if hasattr(e, "response"):
-            print(f"📄 Error body: {e.response.text}", flush=True)
+        # Safe check for error details
+        try:
+            print(f"📄 Error body: {upload_response.text}", flush=True)
+        except:
+            pass
         return None
