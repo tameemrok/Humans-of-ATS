@@ -1,46 +1,42 @@
-import replicate
 import os
+import requests
 
-REPLICATE_API_TOKEN = os.environ.get("REPLICATE_API_TOKEN")
-if not REPLICATE_API_TOKEN:
-    raise ValueError("REPLICATE_API_TOKEN is not set", flush=True)
+HUGGINGFACE_TOKEN = os.environ.get("HUGGINGFACE_TOKEN")
+if not HUGGINGFACE_TOKEN:
+    raise ValueError("HUGGINGFACE_TOKEN is not set", flush=True)
 
-replicate.Client(api_token=REPLICATE_API_TOKEN)
+API_URL = "https://api-inference.huggingface.co/models/InstantX/InstantID"
+headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
 
 ERA_PROMPTS = {
-    "1920s": "a black and white vintage portrait, 1920s, realistic, studio lighting",
-    "1980s": "a retro pop art selfie, 1980s style, colorful, close-up",
-    "2020s": "modern Instagram selfie, clean skin, shallow depth of field",
-    "2050": "futuristic sci-fi cyberpunk portrait, glowing effects, fantasy lighting"
+    "1920s": "portrait in 1920s vintage style, black and white, dramatic lighting",
+    "1980s": "retro 1980s headshot, neon tones, pop art styling",
+    "2020s": "modern instagram selfie, realistic lighting, minimal edit",
+    "2050": "futuristic sci-fi look, glowing cyberpunk background"
 }
 
-MODEL_REF = "stability-ai/stable-diffusion-img2img:15a3689ee13b0d2616e98820eca31d4c3abcd36672df6afce5cb6feb1d66087d"
-
 def transform_image(image_url: str, era: str):
-    prompt = ERA_PROMPTS.get(era, "vintage portrait")
-    print(f"🧠 Sending to Replicate → Prompt: '{prompt}', Image URL: {image_url}", flush=True)
+    prompt = ERA_PROMPTS.get(era, "vintage style photo")
+    print(f"🧠 Sending to HuggingFace → Prompt: '{prompt}', Image URL: {image_url}", flush=True)
 
     try:
-        output = replicate.run(
-            MODEL_REF,
-            input={
+        payload = {
+            "inputs": {
                 "image": image_url,
-                "prompt": prompt,
-                "scheduler": "DPMSolverMultistep",
-                "num_outputs": 1,
-                "guidance_scale": 7.5,
-                "prompt_strength": 0.8,
-                "num_inference_steps": 25
+                "prompt": prompt
             }
-        )
+        }
+        response = requests.post(API_URL, headers=headers, json=payload)
+        response.raise_for_status()
+        output = response.json()
 
-        if not isinstance(output, list) or not output or not output[0]:
-            print(f"❌ Invalid output from Replicate. Output: {output}", flush=True)
-            return None
+        if isinstance(output, list) and output and 'url' in output[0]:
+            print(f"✅ HuggingFace output URL: {output[0]['url']}", flush=True)
+            return output[0]['url']
 
-        print(f"✅ Replicate image for {era}: {output[0]}", flush=True)
-        return output[0]
+        print(f"❌ Unexpected HuggingFace output: {output}", flush=True)
+        return None
 
     except Exception as e:
-        print(f"❌ Error from Replicate for {era}: {e}", flush=True)
+        print(f"❌ Error from HuggingFace for {era}: {e}", flush=True)
         return None
