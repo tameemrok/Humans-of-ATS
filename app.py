@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
+    print("⚙️ WhatsApp webhook triggered", flush=True)
     incoming_msg = request.values.get("Body", "").lower()
     media_url = request.values.get("MediaUrl0", "")
     from_number = request.values.get("From", "")
@@ -22,15 +23,20 @@ def whatsapp():
 
         selfie_url = upload_to_cloudinary(media_url)
         if not selfie_url:
+            print("❌ Image upload failed, aborting.", flush=True)
             resp.message("❌ Failed to process image. Try again.")
             return str(resp)
+
+        print(f"🌐 Image available at: {selfie_url}", flush=True)
 
         eras = ["1920s", "1980s", "2020s", "2050"]
         image_urls = []
 
         for era in eras:
+            print(f"🧪 Generating for: {era}", flush=True)
             url = transform_image(selfie_url, era)
             if not url:
+                print(f"❌ Generation failed for {era}", flush=True)
                 resp.message(f"❌ Failed to generate for {era}. Try again later.")
                 return str(resp)
             image_urls.append(url)
@@ -41,8 +47,10 @@ def whatsapp():
         msg = resp.message("🕰️ Here's your Time Travel Face!")
         msg.media(request.url_root + "static/collage.jpg")
     else:
+        print("❌ No image received in WhatsApp message", flush=True)
         resp.message("👋 Please send a selfie to get started!")
 
+    print("✅ WhatsApp request completed", flush=True)
     return str(resp)
 
 if __name__ == "__main__":
