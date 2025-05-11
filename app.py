@@ -5,6 +5,7 @@ from cloudinary_upload import upload_to_cloudinary
 from merge_collage import create_collage
 import os
 
+
 app = Flask(__name__)
 
 @app.route("/whatsapp", methods=["POST"])
