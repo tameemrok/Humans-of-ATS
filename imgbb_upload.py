@@ -1,12 +1,11 @@
 import requests
 import os
-from base64 import b64encode
 
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 
 def upload_to_replicate_delivery(image_url: str) -> str:
-    print(f"📥 Downloading image from Twilio: {image_url}", flush=True)
+    print(f"📅 Downloading image from Twilio: {image_url}", flush=True)
 
     try:
         response = requests.get(image_url, auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN))
